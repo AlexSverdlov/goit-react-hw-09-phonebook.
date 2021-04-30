@@ -1,76 +1,72 @@
-import React from 'react';
-import { connect } from 'react-redux';
+//npm
+import React, { useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import { addContact } from '../redux/contacts/contacts-operations';
-import contactSelectors from '../redux/contacts/contacts-selectors';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+//module
+import { addContact } from '../redux/contacts/contacts-operations';
+import contactSelectors from '../redux/contacts/contacts-selectors';
 
-class ContactForm extends React.Component {
-  state = {
-    name: '',
-    number: '',
-  };
+export default function ContactForm() {
+  const dispatch = useDispatch();
 
-  handleChange = e => {
-    const { name, value } = e.currentTarget;
-    this.setState({ [name]: value });
-  };
+  const [name, Setname] = useState('');
+  const [number, Setnumber] = useState('');
 
-  handleSubmit = e => {
-    e.preventDefault();
-    const contact = {
-      id: uuidv4(),
-      name: this.state.name,
-      number: this.state.number,
-    };
-    if (
-      this.props.items.find(
-        item => item.name.toUpperCase() === this.state.name.toUpperCase(),
-      )
-    ) {
-      alert(this.state.name + ' is already in contacts');
-    } else {
-      this.props.onSubmit(contact);
-      this.setState({ name: '', number: '' });
-    }
-  };
+  const items = useSelector(contactSelectors.getItems);
 
-  render() {
-    return (
-      <Form onSubmit={this.handleSubmit} autoComplete="off">
-        <Form.Group>
-          <Form.Label>Имя</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            value={this.state.name}
-            onChange={this.handleChange}
-          />
-        </Form.Group>
+  const handleChangeName = useCallback(e => {
+    Setname(e.currentTarget.value);
+  }, []);
 
-        <Form.Group>
-          <Form.Label>Номер</Form.Label>
-          <Form.Control
-            type="text"
-            name="number"
-            value={this.state.number}
-            onChange={this.handleChange}
-          />
-        </Form.Group>
-        <Button variant="outline-primary" type="submit">
-          Добавить контакт
-        </Button>
-      </Form>
-    );
-  }
+  const handleChangeNumber = useCallback(e => {
+    Setnumber(e.currentTarget.value);
+  }, []);
+
+  const handleSubmit = useCallback(
+    e => {
+      e.preventDefault();
+      const contact = {
+        id: uuidv4(),
+        name,
+        number,
+      };
+      if (items.find(item => item.name.toUpperCase() === name.toUpperCase())) {
+        alert(name + ' is already in contacts');
+      } else {
+        dispatch(addContact(contact));
+        Setname('');
+        Setnumber('');
+      }
+    },
+    [dispatch, name, number, items],
+  );
+
+  return (
+    <Form onSubmit={handleSubmit} autoComplete="off">
+      <Form.Group>
+        <Form.Label>Имя</Form.Label>
+        <Form.Control
+          type="text"
+          name="name"
+          value={name}
+          onChange={handleChangeName}
+        />
+      </Form.Group>
+
+      <Form.Group>
+        <Form.Label>Номер</Form.Label>
+        <Form.Control
+          type="text"
+          name="number"
+          value={number}
+          onChange={handleChangeNumber}
+        />
+      </Form.Group>
+      <Button variant="outline-primary" type="submit">
+        Добавить контакт
+      </Button>
+    </Form>
+  );
 }
-const mapStateToProps = state => ({
-  items: contactSelectors.getItems(state),
-});
-
-const mapDispatchToProps = dispatch => ({
-  onSubmit: item => dispatch(addContact(item)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);

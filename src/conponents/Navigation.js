@@ -1,7 +1,9 @@
+//npm
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Nav from 'react-bootstrap/Nav';
+//module
 import authSelectors from '../redux/auth/auth-selectors';
 
 const styles = {
@@ -15,7 +17,9 @@ const styles = {
   },
 };
 
-const Navigation = ({ isAuthentificated }) => {
+export default function Navigation() {
+  const isLoggedIn = useSelector(authSelectors.getIsAutentificated);
+
   return (
     <Nav defaultActiveKey="/home" as="ul">
       <Nav.Item as="li">
@@ -30,7 +34,7 @@ const Navigation = ({ isAuthentificated }) => {
           Home
         </NavLink>
       </Nav.Item>
-      {isAuthentificated && (
+      {isLoggedIn && (
         <Nav.Item as="li">
           <NavLink
             exact
@@ -46,10 +50,4 @@ const Navigation = ({ isAuthentificated }) => {
       )}
     </Nav>
   );
-};
-
-const mapStateToProps = state => ({
-  isAuthentificated: authSelectors.getIsAutentificated(state),
-});
-
-export default connect(mapStateToProps)(Navigation);
+}

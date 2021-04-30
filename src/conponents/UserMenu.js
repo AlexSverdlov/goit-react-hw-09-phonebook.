@@ -1,6 +1,8 @@
-import React from 'react';
-import { connect } from 'react-redux';
+//npm
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+//module
 import authSelectors from '../redux/auth/auth-selectors';
 import authOperations from '../redux/auth/auth-operations';
 
@@ -11,21 +13,25 @@ const styles = {
   },
 };
 
-const UserMenu = ({ email, onLogout }) => (
-  <div>
-    <span style={styles.span}>{email}</span>
-    <Button variant="outline-light" type="button" size="sm" onClick={onLogout}>
-      Выйти
-    </Button>
-  </div>
-);
+export default function UserMenu() {
+  const dispatch = useDispatch();
+  const email = useSelector(authSelectors.getUserMail);
 
-const mapStateToProps = state => ({
-  email: authSelectors.getUserMail(state),
-});
+  const onLogout = useCallback(() => {
+    dispatch(authOperations.logout());
+  }, [dispatch]);
 
-const mapDispatchToProps = {
-  onLogout: authOperations.logout,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(UserMenu);
+  return (
+    <div>
+      <span style={styles.span}>{email}</span>
+      <Button
+        variant="outline-light"
+        type="button"
+        size="sm"
+        onClick={onLogout}
+      >
+        Выйти
+      </Button>
+    </div>
+  );
+}

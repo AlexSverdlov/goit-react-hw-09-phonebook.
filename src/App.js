@@ -1,42 +1,39 @@
-import React, { Suspense, lazy } from 'react';
+//npm
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
+//css
+import './App.css';
+//module
 import Appbar from './conponents/AppBar';
 import Container from './conponents/Container/Container';
 import authOperations from './redux/auth/auth-operations';
 import PrivateRoute from './conponents/PrivateRoute';
 import PublicRoute from './conponents/PublicRoute';
-import './App.css';
-
+//lazy
 const Homeview = lazy(() => import('./views/Homeview'));
 const LoginView = lazy(() => import('./views/LoginView'));
 const RegisterView = lazy(() => import('./views/RegisterView'));
 const ContactsView = lazy(() => import('./views/ContactsView'));
 
-class App extends React.Component {
-  componentDidMount() {
-    this.props.onGetCurrentUser();
-  }
+export default function App() {
+  const dispatch = useDispatch();
 
-  render() {
-    return (
-      <Container>
-        <Appbar />
-        <Suspense fallback={<p>Загружаем...</p>}>
-          <Switch>
-            <Route exact path="/" component={Homeview} />
-            <PublicRoute path="/login" restricted component={LoginView} />
-            <PublicRoute path="/register" restricted component={RegisterView} />
-            <PrivateRoute path="/contacts" component={ContactsView} />
-          </Switch>
-        </Suspense>
-      </Container>
-    );
-  }
+  useEffect(() => {
+    dispatch(authOperations.getCurrentUser());
+  }, [dispatch]);
+
+  return (
+    <Container>
+      <Appbar />
+      <Suspense fallback={<p>Загружаем...</p>}>
+        <Switch>
+          <Route exact path="/" component={Homeview} />
+          <PublicRoute path="/login" restricted component={LoginView} />
+          <PublicRoute path="/register" restricted component={RegisterView} />
+          <PrivateRoute path="/contacts" component={ContactsView} />
+        </Switch>
+      </Suspense>
+    </Container>
+  );
 }
-
-const mapDispatchToProps = {
-  onGetCurrentUser: authOperations.getCurrentUser,
-};
-
-export default connect(null, mapDispatchToProps)(App);
